@@ -1,0 +1,36 @@
+{
+  "name": "cloud-inventory",
+  "version": "0.0.1",
+  "description": "Cloud Infrastructure Inventory",
+  "main": "build/cloud-inventory.js",
+  "module": "build/cloud-inventory.module.js",
+  "repository": "ekeyser/cloud-inventory",
+  "directories": {
+    "example": "examples"
+  },
+  "files": [
+    "build",
+    "src"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build-closure": "rollup -c && google-closure-compiler --language_in=ECMASCRIPT5_STRICT --js build/cloud-inventory.js --js_output_file build/cloud-inventory.min.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aws",
+    "cloud",
+    "inventory",
+    "infrastructure"
+  ],
+  "author": "emkeyser",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ekeyser/cloud-inventory/issues"
+  },
+  "homepage": "https://github.com/ekeyser/cloud-inventory.js",
+  "devDependencies": {
+    "axios": "^0.21.1",
+    "google-closure-compiler": "20200224.0.0"
+  }
+}
