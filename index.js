@@ -113,7 +113,6 @@ class CloudInventory {
 
     // MAX_WAIT = 5000;
     // objGlobal = {};
-    // bStopPoller = null;
     // credentials;
     // awsRegions;
     // awsServices;
@@ -126,7 +125,7 @@ class CloudInventory {
     }
 
 
-    run (region, services, credentials)  {
+    run(region, services, credentials) {
         return new Promise((resolve) => {
             const agwclient = new APIGatewayClient(
                 {
@@ -1423,7 +1422,6 @@ class CloudInventory {
     inventory() {
         return new Promise((resolve) => {
 
-            this.bStopPoller = false;
             this.objGlobal = {};
             let arrRequests = [];
 
@@ -1436,14 +1434,11 @@ class CloudInventory {
             });
 
             Promise.all(arrRequests)
-                .then(async () => {
-                    console.log("Finished AWS API calls for each region.");
-                    console.log(this.objGlobal);
-                    console.log(JSON.stringify(this.objGlobal).length);
+                .then(() => {
                     resolve(this.objGlobal);
                 });
         });
     }
 }
 
-module.exports = exports = CloudInventory.CloudInventory = CloudInventory
+module.exports = exports = CloudInventory.CloudInventory = CloudInventory;
