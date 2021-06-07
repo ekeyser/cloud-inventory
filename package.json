@@ -1,6 +1,6 @@
 {
   "name": "cloud-inventory",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Cloud Infrastructure Inventory",
   "main": "index.js",
   "repository": "ekeyser/cloud-inventory",
@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/ekeyser/cloud-inventory/issues"
   },
-  "homepage": "https://github.com/ekeyser/cloud-inventory.js",
+  "homepage": "https://github.com/ekeyser/cloud-inventory",
   "dependencies": {
     "@aws-sdk/client-acm": "^3.18.0",
     "@aws-sdk/client-api-gateway": "^3.18.0",
