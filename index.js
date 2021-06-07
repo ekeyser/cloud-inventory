@@ -1,124 +1,133 @@
+/* eslint-disable */
 /**
  * @author ekeyser
  */
 'use strict';
 
 
-let CloudInventory = () => {
+const {
+    ACMClient,
+    ListCertificatesCommand,
+    DescribeCertificateCommand,
+} = require('@aws-sdk/client-acm');
 
-    const axios = require('axios');
-    const POLL_INTERVAL = 2000;
-    let MAX_WAIT = 5000;
-    let objGlobal = {};
-    let bStopPoller = null;
+const {
+    ElasticLoadBalancingV2Client,
+    DescribeLoadBalancersCommand,
+    DescribeLoadBalancerAttributesCommand,
+} = require('@aws-sdk/client-elastic-load-balancing-v2');
+
+const {
+    LambdaClient,
+    ListFunctionsCommand,
+} = require('@aws-sdk/client-lambda');
+
+const {
+    CloudFrontClient,
+    ListDistributionsCommand,
+    ListCachePoliciesCommand,
+} = require('@aws-sdk/client-cloudfront');
+
+const {
+    IAMClient,
+    ListPoliciesCommand,
+    ListRolesCommand,
+} = require('@aws-sdk/client-iam');
+
+const {
+    ElastiCacheClient,
+    DescribeCacheClustersCommand
+} = require('@aws-sdk/client-elasticache');
+
+const {
+    AutoScalingClient,
+    DescribeLaunchConfigurationsCommand,
+    DescribeAutoScalingGroupsCommand,
+} = require('@aws-sdk/client-auto-scaling');
+
+const {
+    Route53Client,
+    ListHostedZonesCommand
+} = require('@aws-sdk/client-route-53');
+
+const {
+    DynamoDBClient,
+    DescribeTableCommand,
+    ListTablesCommand
+} = require('@aws-sdk/client-dynamodb');
+
+const {
+    CloudWatchClient,
+    DescribeAlarmsCommand,
+} = require('@aws-sdk/client-cloudwatch');
+
+const {
+    ECSClient,
+    DescribeClustersCommand,
+    ListServicesCommand,
+    ListClustersCommand,
+    DescribeServicesCommand,
+    ListTaskDefinitionsCommand,
+    DescribeTaskDefinitionCommand,
+} = require('@aws-sdk/client-ecs');
+
+const {
+    ECRClient,
+    DescribeRepositoriesCommand,
+} = require('@aws-sdk/client-ecr');
+
+const {
+    RDSClient,
+    DescribeDBInstancesCommand,
+    DescribeDBSubnetGroupsCommand,
+    DescribeDBParameterGroupsCommand,
+    DescribeOptionGroupsCommand,
+    DescribeDBClustersCommand,
+} = require('@aws-sdk/client-rds');
+
+const {
+    S3Client,
+    ListBucketsCommand
+} = require('@aws-sdk/client-s3');
+
+const {
+    APIGatewayClient,
+    GetRestApisCommand,
+    GetRestApiCommand,
+    GetMethodCommand,
+    GetUsagePlansCommand,
+    GetResourcesCommand,
+} = require('@aws-sdk/client-api-gateway');
+
+const {
+    EC2Client,
+    DescribeInstancesCommand,
+    DescribeVpcsCommand,
+    DescribeSubnetsCommand,
+    DescribeRouteTablesCommand,
+    DescribeVolumesCommand,
+    DescribeSecurityGroupsCommand
+} = require('@aws-sdk/client-ec2');
+
+class CloudInventory {
+
+    // MAX_WAIT = 5000;
+    // objGlobal = {};
+    // bStopPoller = null;
+    // credentials;
+    // awsRegions;
+    // awsServices;
 
 
-    const {
-        ACMClient,
-        ListCertificatesCommand,
-        DescribeCertificateCommand,
-    } = require('@aws-sdk/client-acm');
-    const {
-        ElasticLoadBalancingV2Client,
-        DescribeLoadBalancersCommand,
-        DescribeLoadBalancerAttributesCommand,
-    } = require('@aws-sdk/client-elastic-load-balancing-v2');
+    constructor(config) {
+        this.credentials = config.aws.credentials;
+        this.awsRegions = config.aws.regions;
+        this.awsServices = config.aws.services;
+    }
 
-    const {
-        LambdaClient,
-        ListFunctionsCommand,
-    } = require('@aws-sdk/client-lambda');
 
-    const {
-        CloudFrontClient,
-        ListDistributionsCommand,
-        ListCachePoliciesCommand,
-    } = require('@aws-sdk/client-cloudfront');
-
-    const {
-        IAMClient,
-        ListPoliciesCommand,
-        ListRolesCommand,
-    } = require('@aws-sdk/client-iam');
-
-    const {
-        ElastiCacheClient,
-        DescribeCacheClustersCommand
-    } = require('@aws-sdk/client-elasticache');
-
-    const {
-        AutoScalingClient,
-        DescribeLaunchConfigurationsCommand,
-        DescribeAutoScalingGroupsCommand,
-    } = require('@aws-sdk/client-auto-scaling');
-
-    const {
-        Route53Client,
-        ListHostedZonesCommand
-    } = require('@aws-sdk/client-route-53');
-
-    const {
-        DynamoDBClient,
-        DescribeTableCommand,
-        ListTablesCommand
-    } = require('@aws-sdk/client-dynamodb');
-
-    const {
-        CloudWatchClient,
-        DescribeAlarmsCommand,
-    } = require('@aws-sdk/client-cloudwatch');
-
-    const {
-        ECSClient,
-        DescribeClustersCommand,
-        ListServicesCommand,
-        ListClustersCommand,
-        DescribeServicesCommand,
-        ListTaskDefinitionsCommand,
-        DescribeTaskDefinitionCommand,
-    } = require('@aws-sdk/client-ecs');
-
-    const {
-        ECRClient,
-        DescribeRepositoriesCommand,
-    } = require('@aws-sdk/client-ecr');
-
-    const {
-        RDSClient,
-        DescribeDBInstancesCommand,
-        DescribeDBSubnetGroupsCommand,
-        DescribeDBParameterGroupsCommand,
-        DescribeOptionGroupsCommand,
-        DescribeDBClustersCommand,
-    } = require('@aws-sdk/client-rds');
-
-    const {
-        S3Client,
-        ListBucketsCommand
-    } = require('@aws-sdk/client-s3');
-
-    const {
-        APIGatewayClient,
-        GetRestApisCommand,
-        GetRestApiCommand,
-        GetMethodCommand,
-        GetUsagePlansCommand,
-        GetResourcesCommand,
-    } = require('@aws-sdk/client-api-gateway');
-
-    const {
-        EC2Client,
-        DescribeInstancesCommand,
-        DescribeVpcsCommand,
-        DescribeSubnetsCommand,
-        DescribeRouteTablesCommand,
-        DescribeVolumesCommand,
-        DescribeSecurityGroupsCommand
-    } = require('@aws-sdk/client-ec2');
-
-    const run = (region, services, credentials) => {
+    run (region, services, credentials)  {
         return new Promise((resolve) => {
-
             const agwclient = new APIGatewayClient(
                 {
                     region,
@@ -199,7 +208,7 @@ let CloudInventory = () => {
             const rdsclient = new RDSClient(
                 {
                     region,
-                    credentials
+                    credentials,
                 }
             );
 
@@ -242,15 +251,15 @@ let CloudInventory = () => {
                         .then((data) => {
                             data.CachePolicyList.Items.forEach((cachePolicy) => {
 
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].CachePolicies === undefined) {
-                                    objGlobal[region].CachePolicies = [];
+                                if (this.objGlobal[region].CachePolicies === undefined) {
+                                    this.objGlobal[region].CachePolicies = [];
                                 }
 
-                                objGlobal[region].CachePolicies.push(cachePolicy);
+                                this.objGlobal[region].CachePolicies.push(cachePolicy);
                             });
                             resolve(`rCfLCP`);
                         })
@@ -267,15 +276,15 @@ let CloudInventory = () => {
                         cfclient.send(new ListDistributionsCommand({}))
                             .then((data) => {
                                 data.DistributionList.Items.forEach((distribution) => {
-                                    if (objGlobal[region] === undefined) {
-                                        objGlobal[region] = {};
+                                    if (this.objGlobal[region] === undefined) {
+                                        this.objGlobal[region] = {};
                                     }
 
-                                    if (objGlobal[region].Distributions === undefined) {
-                                        objGlobal[region].Distributions = [];
+                                    if (this.objGlobal[region].Distributions === undefined) {
+                                        this.objGlobal[region].Distributions = [];
                                     }
 
-                                    objGlobal[region].Distributions.push(distribution);
+                                    this.objGlobal[region].Distributions.push(distribution);
                                 });
                                 resolve(`rCfLD`);
                             })
@@ -293,15 +302,15 @@ let CloudInventory = () => {
                     iamclient.send(new ListPoliciesCommand({}))
                         .then((data) => {
                             data.Policies.forEach((policy) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Policies === undefined) {
-                                    objGlobal[region].Policies = [];
+                                if (this.objGlobal[region].Policies === undefined) {
+                                    this.objGlobal[region].Policies = [];
                                 }
 
-                                objGlobal[region].Policies.push(policy);
+                                this.objGlobal[region].Policies.push(policy);
                             });
                             resolve(`rIamLP`);
                         })
@@ -318,15 +327,15 @@ let CloudInventory = () => {
                     iamclient.send(new ListRolesCommand({}))
                         .then((data) => {
                             data.Roles.forEach((role) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Roles === undefined) {
-                                    objGlobal[region].Roles = [];
+                                if (this.objGlobal[region].Roles === undefined) {
+                                    this.objGlobal[region].Roles = [];
                                 }
 
-                                objGlobal[region].Roles.push(role);
+                                this.objGlobal[region].Roles.push(role);
                             });
                             resolve(`rIamLR`);
                         })
@@ -343,15 +352,15 @@ let CloudInventory = () => {
                     r53client.send(new ListHostedZonesCommand({}))
                         .then((data) => {
                             data.HostedZones.forEach((hostedZone) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].HostedZones === undefined) {
-                                    objGlobal[region].HostedZones = [];
+                                if (this.objGlobal[region].HostedZones === undefined) {
+                                    this.objGlobal[region].HostedZones = [];
                                 }
 
-                                objGlobal[region].HostedZones.push(hostedZone);
+                                this.objGlobal[region].HostedZones.push(hostedZone);
                             });
                             resolve(`rR53LHZ`);
                         })
@@ -371,15 +380,15 @@ let CloudInventory = () => {
                     lambdaclient.send(new ListFunctionsCommand({}))
                         .then((data) => {
                             data.Functions.forEach((lambdaFunction) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Functions === undefined) {
-                                    objGlobal[region].Functions = [];
+                                if (this.objGlobal[region].Functions === undefined) {
+                                    this.objGlobal[region].Functions = [];
                                 }
 
-                                objGlobal[region].Functions.push(lambdaFunction);
+                                this.objGlobal[region].Functions.push(lambdaFunction);
                             });
                             resolve(`rLamLF`);
                         })
@@ -397,15 +406,15 @@ let CloudInventory = () => {
                     elcclient.send(new DescribeCacheClustersCommand({}))
                         .then((data) => {
                             data.CacheClusters.forEach((cacheCluster) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].CacheClusters === undefined) {
-                                    objGlobal[region].CacheClusters = [];
+                                if (this.objGlobal[region].CacheClusters === undefined) {
+                                    this.objGlobal[region].CacheClusters = [];
                                 }
 
-                                objGlobal[region].CacheClusters.push(cacheCluster);
+                                this.objGlobal[region].CacheClusters.push(cacheCluster);
                             });
                             resolve(`rElcDCC`);
                         })
@@ -422,15 +431,15 @@ let CloudInventory = () => {
                     asgclient.send(new DescribeAutoScalingGroupsCommand({}))
                         .then((data) => {
                             data.AutoScalingGroups.forEach((asg) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].AutoScalingGroups === undefined) {
-                                    objGlobal[region].AutoScalingGroups = [];
+                                if (this.objGlobal[region].AutoScalingGroups === undefined) {
+                                    this.objGlobal[region].AutoScalingGroups = [];
                                 }
 
-                                objGlobal[region].AutoScalingGroups.push(asg);
+                                this.objGlobal[region].AutoScalingGroups.push(asg);
                             });
                             resolve(`rAsgDASG`);
                         })
@@ -447,15 +456,15 @@ let CloudInventory = () => {
                     asgclient.send(new DescribeLaunchConfigurationsCommand({}))
                         .then((data) => {
                             data.LaunchConfigurations.forEach((launchConfiguration) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].LaunchConfigurations === undefined) {
-                                    objGlobal[region].LaunchConfigurations = [];
+                                if (this.objGlobal[region].LaunchConfigurations === undefined) {
+                                    this.objGlobal[region].LaunchConfigurations = [];
                                 }
 
-                                objGlobal[region].LaunchConfigurations.push(launchConfiguration);
+                                this.objGlobal[region].LaunchConfigurations.push(launchConfiguration);
                             });
                             resolve(`rAsgDLC`);
                         })
@@ -496,15 +505,15 @@ let CloudInventory = () => {
                                     .then((Table) => {
                                         return new Promise((resolve) => {
 
-                                            if (objGlobal[region] === undefined) {
-                                                objGlobal[region] = {};
+                                            if (this.objGlobal[region] === undefined) {
+                                                this.objGlobal[region] = {};
                                             }
 
-                                            if (objGlobal[region].Tables === undefined) {
-                                                objGlobal[region].Tables = [];
+                                            if (this.objGlobal[region].Tables === undefined) {
+                                                this.objGlobal[region].Tables = [];
                                             }
 
-                                            objGlobal[region].Tables.push(Table);
+                                            this.objGlobal[region].Tables.push(Table);
                                             resolve(`Table described for ${TableName}`);
                                         });
                                     }));
@@ -527,15 +536,15 @@ let CloudInventory = () => {
                     rdsclient.send(new DescribeDBSubnetGroupsCommand({}))
                         .then((data) => {
                             data.DBSubnetGroups.forEach((subnetGroup) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].SubnetGroups === undefined) {
-                                    objGlobal[region].SubnetGroups = [];
+                                if (this.objGlobal[region].SubnetGroups === undefined) {
+                                    this.objGlobal[region].SubnetGroups = [];
                                 }
 
-                                objGlobal[region].SubnetGroups.push(subnetGroup);
+                                this.objGlobal[region].SubnetGroups.push(subnetGroup);
                             });
                             resolve(`rRdsDSG`);
                         })
@@ -552,15 +561,15 @@ let CloudInventory = () => {
                     rdsclient.send(new DescribeDBParameterGroupsCommand({}))
                         .then((data) => {
                             data.DBParameterGroups.forEach((paramGroup) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].ParameterGroups === undefined) {
-                                    objGlobal[region].ParameterGroups = [];
+                                if (this.objGlobal[region].ParameterGroups === undefined) {
+                                    this.objGlobal[region].ParameterGroups = [];
                                 }
 
-                                objGlobal[region].ParameterGroups.push(paramGroup);
+                                this.objGlobal[region].ParameterGroups.push(paramGroup);
                             });
                             resolve(`rRdsDPG`);
                         })
@@ -577,15 +586,15 @@ let CloudInventory = () => {
                     rdsclient.send(new DescribeOptionGroupsCommand({}))
                         .then((data) => {
                             data.OptionGroupsList.forEach((optionGroup) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].OptionGroups === undefined) {
-                                    objGlobal[region].OptionGroups = [];
+                                if (this.objGlobal[region].OptionGroups === undefined) {
+                                    this.objGlobal[region].OptionGroups = [];
                                 }
 
-                                objGlobal[region].OptionGroups.push(optionGroup);
+                                this.objGlobal[region].OptionGroups.push(optionGroup);
                             });
                             resolve(`rRdsDOG`);
                         })
@@ -598,19 +607,18 @@ let CloudInventory = () => {
 
             let rRdsDC = () => {
                 return new Promise((resolve, reject) => {
-
                     rdsclient.send(new DescribeDBClustersCommand({}))
                         .then((data) => {
                             data.DBClusters.forEach((cluster) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].DBClusters === undefined) {
-                                    objGlobal[region].DBClusters = [];
+                                if (this.objGlobal[region].DBClusters === undefined) {
+                                    this.objGlobal[region].DBClusters = [];
                                 }
 
-                                objGlobal[region].DBClusters.push(cluster);
+                                this.objGlobal[region].DBClusters.push(cluster);
                             });
                             resolve(`rRdsDC`);
                         })
@@ -627,15 +635,15 @@ let CloudInventory = () => {
                     rdsclient.send(new DescribeDBInstancesCommand({}))
                         .then((data) => {
                             data.DBInstances.forEach((dbInstance) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].DBInstances === undefined) {
-                                    objGlobal[region].DBInstances = [];
+                                if (this.objGlobal[region].DBInstances === undefined) {
+                                    this.objGlobal[region].DBInstances = [];
                                 }
 
-                                objGlobal[region].DBInstances.push(dbInstance);
+                                this.objGlobal[region].DBInstances.push(dbInstance);
                             });
                             resolve(`rRdsDI`);
                         })
@@ -655,15 +663,15 @@ let CloudInventory = () => {
                     }))
                         .then((data) => {
                             data.services.forEach((service) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].ECSServices === undefined) {
-                                    objGlobal[region].ECSServices = [];
+                                if (this.objGlobal[region].ECSServices === undefined) {
+                                    this.objGlobal[region].ECSServices = [];
                                 }
 
-                                objGlobal[region].ECSServices.push(service);
+                                this.objGlobal[region].ECSServices.push(service);
                             });
                             resolve(`rEcsDS`);
                         })
@@ -706,15 +714,15 @@ let CloudInventory = () => {
                         .then((data) => {
                             data.clusters.forEach((cluster) => {
                                 rEcsLS(cluster);
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].ECSClusters === undefined) {
-                                    objGlobal[region].ECSClusters = [];
+                                if (this.objGlobal[region].ECSClusters === undefined) {
+                                    this.objGlobal[region].ECSClusters = [];
                                 }
 
-                                objGlobal[region].ECSClusters.push(cluster);
+                                this.objGlobal[region].ECSClusters.push(cluster);
                             });
                             resolve(`rEcsDC`);
                         })
@@ -752,15 +760,15 @@ let CloudInventory = () => {
                     ecrclient.send(new DescribeRepositoriesCommand({}))
                         .then((data) => {
                             data.repositories.forEach((repo) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].ECRRepositories === undefined) {
-                                    objGlobal[region].ECRRepositories = [];
+                                if (this.objGlobal[region].ECRRepositories === undefined) {
+                                    this.objGlobal[region].ECRRepositories = [];
                                 }
 
-                                objGlobal[region].ECRRepositories.push(repo);
+                                this.objGlobal[region].ECRRepositories.push(repo);
                             });
                             resolve(`rEcrDR`);
                         })
@@ -777,15 +785,15 @@ let CloudInventory = () => {
                     cwclient.send(new DescribeAlarmsCommand({}))
                         .then((data) => {
                             data.MetricAlarms.forEach((alarm) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].MetricAlarms === undefined) {
-                                    objGlobal[region].MetricAlarms = [];
+                                if (this.objGlobal[region].MetricAlarms === undefined) {
+                                    this.objGlobal[region].MetricAlarms = [];
                                 }
 
-                                objGlobal[region].MetricAlarms.push(alarm);
+                                this.objGlobal[region].MetricAlarms.push(alarm);
                             });
                             resolve(`rCwDA`);
                         })
@@ -802,15 +810,15 @@ let CloudInventory = () => {
                     ec2client.send(new DescribeRouteTablesCommand({}))
                         .then((data) => {
                             data.RouteTables.forEach((routeTable) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].RouteTables === undefined) {
-                                    objGlobal[region].RouteTables = [];
+                                if (this.objGlobal[region].RouteTables === undefined) {
+                                    this.objGlobal[region].RouteTables = [];
                                 }
 
-                                objGlobal[region].RouteTables.push(routeTable);
+                                this.objGlobal[region].RouteTables.push(routeTable);
                             });
                             resolve(`rEc2DRT`);
                         })
@@ -827,15 +835,15 @@ let CloudInventory = () => {
                     ec2client.send(new DescribeVolumesCommand({}))
                         .then((data) => {
                             data.Volumes.forEach((volume) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Volumes === undefined) {
-                                    objGlobal[region].Volumes = [];
+                                if (this.objGlobal[region].Volumes === undefined) {
+                                    this.objGlobal[region].Volumes = [];
                                 }
 
-                                objGlobal[region].Volumes.push(volume);
+                                this.objGlobal[region].Volumes.push(volume);
                             });
                             resolve(`rEc2DVo`);
                         })
@@ -852,15 +860,15 @@ let CloudInventory = () => {
                     ec2client.send(new DescribeVpcsCommand({}))
                         .then((data) => {
                             data.Vpcs.forEach((vpc) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Vpcs === undefined) {
-                                    objGlobal[region].Vpcs = [];
+                                if (this.objGlobal[region].Vpcs === undefined) {
+                                    this.objGlobal[region].Vpcs = [];
                                 }
 
-                                objGlobal[region].Vpcs.push(vpc);
+                                this.objGlobal[region].Vpcs.push(vpc);
                             });
                             resolve(`rEc2DV`);
                         })
@@ -877,15 +885,15 @@ let CloudInventory = () => {
                     ec2client.send(new DescribeSubnetsCommand({}))
                         .then((data) => {
                             data.Subnets.forEach((subnet) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Subnets === undefined) {
-                                    objGlobal[region].Subnets = [];
+                                if (this.objGlobal[region].Subnets === undefined) {
+                                    this.objGlobal[region].Subnets = [];
                                 }
 
-                                objGlobal[region].Subnets.push(subnet);
+                                this.objGlobal[region].Subnets.push(subnet);
                             });
                             resolve(`rEc2DS`);
                         })
@@ -903,15 +911,15 @@ let CloudInventory = () => {
                         .then((data) => {
                             data.Reservations.forEach((reservation) => {
                                 reservation.Instances.forEach((instance) => {
-                                    if (objGlobal[region] === undefined) {
-                                        objGlobal[region] = {};
+                                    if (this.objGlobal[region] === undefined) {
+                                        this.objGlobal[region] = {};
                                     }
 
-                                    if (objGlobal[region].Ec2Instances === undefined) {
-                                        objGlobal[region].Ec2Instances = [];
+                                    if (this.objGlobal[region].Ec2Instances === undefined) {
+                                        this.objGlobal[region].Ec2Instances = [];
                                     }
 
-                                    objGlobal[region].Ec2Instances.push(instance);
+                                    this.objGlobal[region].Ec2Instances.push(instance);
                                 });
                             });
                             resolve(`rEc2DI`);
@@ -955,15 +963,15 @@ let CloudInventory = () => {
                                     .then((taskDefinition) => {
                                         return new Promise((resolve, reject) => {
 
-                                            if (objGlobal[region] === undefined) {
-                                                objGlobal[region] = {};
+                                            if (this.objGlobal[region] === undefined) {
+                                                this.objGlobal[region] = {};
                                             }
 
-                                            if (objGlobal[region].TaskDefinitions === undefined) {
-                                                objGlobal[region].TaskDefinitions = [];
+                                            if (this.objGlobal[region].TaskDefinitions === undefined) {
+                                                this.objGlobal[region].TaskDefinitions = [];
                                             }
 
-                                            objGlobal[region].TaskDefinitions.push(taskDefinition);
+                                            this.objGlobal[region].TaskDefinitions.push(taskDefinition);
                                             resolve(`taskDefinition described.`);
                                         });
                                     }));
@@ -986,15 +994,15 @@ let CloudInventory = () => {
                     ec2client.send(new DescribeSecurityGroupsCommand({}))
                         .then((data) => {
                             data.SecurityGroups.forEach((securityGroup) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].SecurityGroups === undefined) {
-                                    objGlobal[region].SecurityGroups = [];
+                                if (this.objGlobal[region].SecurityGroups === undefined) {
+                                    this.objGlobal[region].SecurityGroups = [];
                                 }
 
-                                objGlobal[region].SecurityGroups.push(securityGroup);
+                                this.objGlobal[region].SecurityGroups.push(securityGroup);
                             });
                             resolve(`rEc2DSG`);
                         })
@@ -1093,15 +1101,15 @@ let CloudInventory = () => {
                                         return new Promise((resolve, reject) => {
 
                                             RestApi.Resources = arrResources;
-                                            if (objGlobal[region] === undefined) {
-                                                objGlobal[region] = {};
+                                            if (this.objGlobal[region] === undefined) {
+                                                this.objGlobal[region] = {};
                                             }
 
-                                            if (objGlobal[region].RestApis === undefined) {
-                                                objGlobal[region].RestApis = [];
+                                            if (this.objGlobal[region].RestApis === undefined) {
+                                                this.objGlobal[region].RestApis = [];
                                             }
 
-                                            objGlobal[region].RestApis.push(RestApi);
+                                            this.objGlobal[region].RestApis.push(RestApi);
                                             resolve(`Resources obtained for ${restApiId}`);
                                         });
                                     }));
@@ -1149,15 +1157,15 @@ let CloudInventory = () => {
 
                                             loadBalancer.Attributes = Attributes;
 
-                                            if (objGlobal[region] === undefined) {
-                                                objGlobal[region] = {};
+                                            if (this.objGlobal[region] === undefined) {
+                                                this.objGlobal[region] = {};
                                             }
 
-                                            if (objGlobal[region].ApplicationLoadBalancers === undefined) {
-                                                objGlobal[region].ApplicationLoadBalancers = [];
+                                            if (this.objGlobal[region].ApplicationLoadBalancers === undefined) {
+                                                this.objGlobal[region].ApplicationLoadBalancers = [];
                                             }
 
-                                            objGlobal[region].ApplicationLoadBalancers.push(loadBalancer);
+                                            this.objGlobal[region].ApplicationLoadBalancers.push(loadBalancer);
                                             resolve(`attributes added for ${loadBalancer.LoadBalancerName}`);
                                         });
                                     }));
@@ -1203,15 +1211,15 @@ let CloudInventory = () => {
                                     .then((Certificate) => {
                                         return new Promise((resolve) => {
 
-                                            if (objGlobal[region] === undefined) {
-                                                objGlobal[region] = {};
+                                            if (this.objGlobal[region] === undefined) {
+                                                this.objGlobal[region] = {};
                                             }
 
-                                            if (objGlobal[region].Certificates === undefined) {
-                                                objGlobal[region].Certificates = [];
+                                            if (this.objGlobal[region].Certificates === undefined) {
+                                                this.objGlobal[region].Certificates = [];
                                             }
 
-                                            objGlobal[region].Certificates.push(Certificate);
+                                            this.objGlobal[region].Certificates.push(Certificate);
                                             resolve(`certificate described for ${cert.CertificateArn}`)
                                         });
                                     }));
@@ -1234,15 +1242,15 @@ let CloudInventory = () => {
                     s3client.send(new ListBucketsCommand({}))
                         .then((data) => {
                             data.Buckets.forEach((bucket) => {
-                                if (objGlobal[region] === undefined) {
-                                    objGlobal[region] = {};
+                                if (this.objGlobal[region] === undefined) {
+                                    this.objGlobal[region] = {};
                                 }
 
-                                if (objGlobal[region].Buckets === undefined) {
-                                    objGlobal[region].Buckets = [];
+                                if (this.objGlobal[region].Buckets === undefined) {
+                                    this.objGlobal[region].Buckets = [];
                                 }
 
-                                objGlobal[region].Buckets.push(bucket);
+                                this.objGlobal[region].Buckets.push(bucket);
                             });
                             resolve(`rS3LB`);
                         })
@@ -1263,7 +1271,7 @@ let CloudInventory = () => {
 
 
                     let fRand = Math.random();
-                    let rWait = Math.round(fRand * MAX_WAIT);
+                    let rWait = Math.round(fRand * this.MAX_WAIT);
                     // console.log(`pausing ${rWait} ms....`);
                     await new Promise(resolve => setTimeout(resolve, rWait));
 
@@ -1315,134 +1323,91 @@ let CloudInventory = () => {
             let arrRegionRequests = [];
             services.forEach((svc) => {
                 switch (svc) {
-                    case 'rCfLD':
+                    case 'cf':
                         if (region === 'us-east-1') {
                             arrRegionRequests.push(requestSender(rCfLD));
-                        }
-                        break;
-
-                    case 'rCfLCP':
-                        if (region === 'us-east-1') {
                             arrRegionRequests.push(requestSender(rCfLCP));
                         }
                         break;
 
-                    case 'rIamLP':
+                    case 'iam':
                         if (region === 'us-east-1') {
                             arrRegionRequests.push(requestSender(rIamLP));
-                        }
-                        break;
-
-                    case 'rIamLR':
-                        if (region === 'us-east-1') {
                             arrRegionRequests.push(requestSender(rIamLR));
                         }
                         break;
 
-                    case 'rR53LHZ':
+                    case 'r53':
                         if (region === 'us-east-1') {
                             arrRegionRequests.push(requestSender(rR53LHZ));
                         }
                         break;
 
-                    case 'rLamLF':
+                    case 'lambda':
                         arrRegionRequests.push(requestSender(rLamLF));
                         break;
 
-                    case 'rElcDCC':
+                    case 'elc':
                         arrRegionRequests.push(requestSender(rElcDCC));
                         break;
 
-                    case 'rAsgDASG':
+                    case 'asg':
                         arrRegionRequests.push(requestSender(rAsgDASG));
-                        break;
-
-                    case 'rAsgDLC':
                         arrRegionRequests.push(requestSender(rAsgDLC));
                         break;
 
-                    case 'rDdbLT':
+                    case 'dynamo':
                         arrRegionRequests.push(requestSender(rDdbLT));
                         break;
 
-                    case 'rRdsDI':
+                    case 'rds':
                         arrRegionRequests.push(requestSender(rRdsDI));
-                        break;
-
-                    case 'rRdsDC':
                         arrRegionRequests.push(requestSender(rRdsDC));
-                        break;
-
-                    case 'rRdsDOG':
                         arrRegionRequests.push(requestSender(rRdsDOG));
-                        break;
-
-                    case 'rRdsDPG':
                         arrRegionRequests.push(requestSender(rRdsDPG));
-                        break;
-
-                    case 'rRdsDSG':
                         arrRegionRequests.push(requestSender(rRdsDSG));
                         break;
 
-                    case 'rEc2DI':
+                    case 'ec2':
                         arrRegionRequests.push(requestSender(rEc2DI));
-                        break;
-
-                    case 'rEc2DSG':
                         arrRegionRequests.push(requestSender(rEc2DSG));
-                        break;
-
-                    case 'rEc2DS':
                         arrRegionRequests.push(requestSender(rEc2DS));
-                        break;
-
-                    case 'rEc2DV':
                         arrRegionRequests.push(requestSender(rEc2DV));
-                        break;
-
-                    case 'rEc2DVo':
                         arrRegionRequests.push(requestSender(rEc2DVo));
-                        break;
-
-                    case 'rEc2DRT':
                         arrRegionRequests.push(requestSender(rEc2DRT));
                         break;
 
-                    case 'rCwDA':
+                    case 'cw':
                         arrRegionRequests.push(requestSender(rCwDA));
                         break;
 
-                    case 'rEcrDR':
+                    case 'ecr':
                         arrRegionRequests.push(requestSender(rEcrDR));
                         break;
 
-                    case 'rEcsLC':
+                    case 'ecs':
                         arrRegionRequests.push(requestSender(rEcsLC));
-                        break;
-
-                    case 'rEcsLTD':
                         arrRegionRequests.push(requestSender(rEcsLTD));
                         break;
 
-                    case 'rS3LB':
+                    case 's3':
                         arrRegionRequests.push(requestSender(rS3LB));
                         break;
 
-                    case 'rELBV2DLB':
+                    case 'elb':
                         arrRegionRequests.push(requestSender(rELBV2DLB));
                         break;
 
-                    case 'rAcmLC':
+                    case 'acm':
                         arrRegionRequests.push(requestSender(rAcmLC));
                         break;
 
-                    case 'rAgwGRAs':
+                    case 'apigw':
                         arrRegionRequests.push(requestSender(rAgwGRAs));
                         break;
 
                     default:
-                        console.error(`Unknown fn: '${svc}'`);
+                        console.error(`Unknown service: '${svc}'`);
                 }
             });
 
@@ -1455,161 +1420,30 @@ let CloudInventory = () => {
     };
 
 
-    let sendToS3 = (signedUrl, data) => {
-        return new Promise(async (resolve) => {
-            axios(
-                {
-                    method: 'PUT',
-                    data,
-                    url: signedUrl,
-                    headers: {
-                        'content-type': 'application/json',
-                    }
-                }
-            )
-                .then((res) => {
-                    resolve(res);
-                });
-        });
-    };
-
-
-    let postGantrie = (obj) => {
-        return new Promise((resolve) => {
-            axios(
-                {
-                    method: 'POST',
-                    url: process.env.BACKEND,
-                    data: obj,
-                    headers: {
-                        'content-type': 'application/json',
-                    }
-                }
-            )
-                .then((res) => {
-                    resolve(res);
-                });
-        });
-    };
-
-
-    let getPresignedUrl = () => {
-        return new Promise((resolve) => {
-            let url = process.env.URL_S3;
-            axios.get(url)
-                .then((p) => {
-                    resolve(p);
-                });
-        });
-    };
-
-    let pollingLoop = (Key) => {
-        return new Promise(async (resolve) => {
-            let url = `${process.env.BACKEND}/status`;
-            let params = {
-                Key: Key
-            };
-
-            while (bStopPoller !== true) {
-
-                let bAllStatusesTrue = true;
-                let p = await axios.get(url, {
-                    params
-                });
-
-                let objStatuses = JSON.parse(p.data.status);
-                let arrRegions = Object.keys(objStatuses);
-                for (let i = 0; i < arrRegions.length; i++) {
-                    let bStatus = objStatuses[arrRegions[i]];
-                    if (bStatus === false) {
-                        bAllStatusesTrue = false;
-                    }
-                }
-
-                if (bAllStatusesTrue === true) {
-                    bStopPoller = true;
-                    resolve(p);
-                }
-
-                await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
-            }
-        });
-    };
-
-    let getCdkCode = (url) => {
-        return new Promise((resolve, reject) => {
-            try {
-                axios.get(url, {})
-                    .then((response) => {
-                        resolve(response.data);
-                    });
-            } catch (err) {
-                reject(err);
-            }
-        });
-    };
-
-    let init = (awsRegions, awsServices, objKeys) => {
+    inventory() {
         return new Promise((resolve) => {
 
-            bStopPoller = false;
-            const credentials = {
-                accessKeyId: objKeys.accessKey,
-                secretAccessKey: objKeys.secretKey,
-            };
-
-            objGlobal = {};
+            this.bStopPoller = false;
+            this.objGlobal = {};
             let arrRequests = [];
 
             /*
-            Calculate temporal spreae
+            Calculate temporal spread
              */
-            MAX_WAIT = Math.floor((awsRegions.length + awsServices.length) / 2) * 1000;
-            awsRegions.forEach((region) => {
-                arrRequests.push(run(region, awsServices, credentials));
+            this.MAX_WAIT = Math.floor((this.awsRegions.length + this.awsServices.length) / 2) * 1000;
+            this.awsRegions.forEach((region) => {
+                arrRequests.push(this.run(region, this.awsServices, this.credentials));
             });
 
             Promise.all(arrRequests)
                 .then(async () => {
                     console.log("Finished AWS API calls for each region.");
-                    console.log(objGlobal);
-                    console.log(JSON.stringify(objGlobal).length);
-                    let oPSURL = await getPresignedUrl();
-
-
-                    sendToS3(oPSURL.data.Url, objGlobal)
-                        .then(() => {
-                            postGantrie(oPSURL.data)
-                                .then(() => {
-                                    pollingLoop(oPSURL.data.Key)
-                                        .then((p) => {
-                                            let objStatus = JSON.parse(p.data.status);
-                                            let arrPromises = [];
-                                            Object.keys(objStatus).forEach(async (region, i) => {
-
-                                                arrPromises.push(getCdkCode(objStatus[region])
-                                                    .then((p) => {
-                                                        return new Promise((resolve) => {
-                                                            let obj = {
-                                                                region,
-                                                                content: p,
-                                                            };
-                                                            resolve(obj);
-                                                        });
-
-                                                    }));
-                                            });
-                                            Promise.all(arrPromises)
-                                                .then((p) => {
-                                                    resolve(p);
-                                                });
-                                        });
-                                });
-                        });
+                    console.log(this.objGlobal);
+                    console.log(JSON.stringify(this.objGlobal).length);
+                    resolve(this.objGlobal);
                 });
         });
-    };
-};
+    }
+}
 
-
-export {CloudInventory as default};
+module.exports = exports = CloudInventory.CloudInventory = CloudInventory

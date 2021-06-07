@@ -1,16 +1,11 @@
 {
   "name": "cloud-inventory",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Cloud Infrastructure Inventory",
-  "main": "build/cloud-inventory.js",
-  "module": "build/cloud-inventory.module.js",
+  "main": "index.js",
   "repository": "ekeyser/cloud-inventory",
-  "directories": {
-    "example": "examples"
-  },
   "files": [
-    "build",
-    "src"
+    "index.js"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -29,8 +24,23 @@
     "url": "https://github.com/ekeyser/cloud-inventory/issues"
   },
   "homepage": "https://github.com/ekeyser/cloud-inventory.js",
-  "devDependencies": {
-    "axios": "^0.21.1",
-    "google-closure-compiler": "20200224.0.0"
-  }
+  "dependencies": {
+    "@aws-sdk/client-acm": "^3.18.0",
+    "@aws-sdk/client-api-gateway": "^3.18.0",
+    "@aws-sdk/client-auto-scaling": "^3.18.0",
+    "@aws-sdk/client-cloudfront": "^3.18.0",
+    "@aws-sdk/client-cloudwatch": "^3.18.0",
+    "@aws-sdk/client-dynamodb": "^3.18.0",
+    "@aws-sdk/client-ec2": "^3.18.0",
+    "@aws-sdk/client-ecr": "^3.18.0",
+    "@aws-sdk/client-ecs": "^3.18.0",
+    "@aws-sdk/client-elastic-load-balancing-v2": "^3.18.0",
+    "@aws-sdk/client-elasticache": "^3.18.0",
+    "@aws-sdk/client-iam": "^3.18.0",
+    "@aws-sdk/client-lambda": "^3.18.0",
+    "@aws-sdk/client-rds": "^3.18.0",
+    "@aws-sdk/client-route-53": "^3.18.0",
+    "@aws-sdk/client-s3": "^3.18.0"
+  },
+  "devDependencies": {}
 }
