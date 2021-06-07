@@ -1,6 +1,6 @@
 {
   "name": "cloud-inventory",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "Cloud Infrastructure Inventory",
   "main": "index.js",
   "repository": "ekeyser/cloud-inventory",
@@ -25,22 +25,7 @@
   },
   "homepage": "https://github.com/ekeyser/cloud-inventory",
   "dependencies": {
-    "@aws-sdk/client-acm": "^3.18.0",
-    "@aws-sdk/client-api-gateway": "^3.18.0",
-    "@aws-sdk/client-auto-scaling": "^3.18.0",
-    "@aws-sdk/client-cloudfront": "^3.18.0",
-    "@aws-sdk/client-cloudwatch": "^3.18.0",
-    "@aws-sdk/client-dynamodb": "^3.18.0",
-    "@aws-sdk/client-ec2": "^3.18.0",
-    "@aws-sdk/client-ecr": "^3.18.0",
-    "@aws-sdk/client-ecs": "^3.18.0",
-    "@aws-sdk/client-elastic-load-balancing-v2": "^3.18.0",
-    "@aws-sdk/client-elasticache": "^3.18.0",
-    "@aws-sdk/client-iam": "^3.18.0",
-    "@aws-sdk/client-lambda": "^3.18.0",
-    "@aws-sdk/client-rds": "^3.18.0",
-    "@aws-sdk/client-route-53": "^3.18.0",
-    "@aws-sdk/client-s3": "^3.18.0"
+    "aws-inventory": "0.0.3"
   },
   "devDependencies": {}
 }

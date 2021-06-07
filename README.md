@@ -9,6 +9,7 @@ Supported cloud vendors:
 `AWS`
 
 Supported services (and APIs):
+AWS
 `EC2:`
 `RDS:`
 `ELC:`
@@ -26,6 +27,7 @@ Supported services (and APIs):
 `ACM: `
 
 Supported Regions
+AWS
 `us-west-1`
 `us-west-2`
 `us-east-1`
