@@ -1342,7 +1342,7 @@ class CloudInventory {
                         }
                         break;
 
-                    case 'lambda':
+                    case 'lam':
                         arrRegionRequests.push(requestSender(rLamLF));
                         break;
 
@@ -1355,7 +1355,7 @@ class CloudInventory {
                         arrRegionRequests.push(requestSender(rAsgDLC));
                         break;
 
-                    case 'dynamo':
+                    case 'ddb':
                         arrRegionRequests.push(requestSender(rDdbLT));
                         break;
 
@@ -1401,7 +1401,7 @@ class CloudInventory {
                         arrRegionRequests.push(requestSender(rAcmLC));
                         break;
 
-                    case 'apigw':
+                    case 'agw':
                         arrRegionRequests.push(requestSender(rAgwGRAs));
                         break;
 
