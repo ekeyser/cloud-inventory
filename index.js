@@ -5,7 +5,7 @@
 'use strict';
 
 
-const {AwsInventory} = require('aws-inventory');
+const {AwsInventory} = require('../aws-inventory');
 // const { AzureInventory } = require('azure-inventory');
 // const { GoogleCloudInventory } = require('google-cloud-inventory');
 
@@ -55,7 +55,6 @@ class CloudInventory {
                 // this.MAX_WAIT = Math.floor((this.config[vendor].regions.length + this.config[vendor].services.length) / 2) * 1000;
                 arrRequests.push(oCloudProvider.inventory()
                     .then((promise) => {
-                        console.log('Mk.11');
                         this.objGlobal[vendor] = promise;
                     })
                 );
