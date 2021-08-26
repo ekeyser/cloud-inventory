@@ -1,6 +1,6 @@
 {
   "name": "cloud-inventory",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cloud Infrastructure Inventory",
   "main": "index.js",
   "repository": "ekeyser/cloud-inventory",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/ekeyser/cloud-inventory",
   "dependencies": {
-    "aws-inventory": "0.1.0"
+    "aws-inventory": "0.1.1"
   },
   "devDependencies": {}
 }
