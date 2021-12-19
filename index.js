@@ -5,11 +5,11 @@
 'use strict';
 
 
-const {AwsInventory} = require('../aws-inventory');
+import {AwsInventory} from 'aws-inventory';
 // const { AzureInventory } = require('azure-inventory');
 // const { GoogleCloudInventory } = require('google-cloud-inventory');
 
-class CloudInventory {
+export class CloudInventory {
 
     // MAX_WAIT = 5000;
     // objGlobal = {};
@@ -70,5 +70,3 @@ class CloudInventory {
         });
     }
 }
-
-module.exports = exports = CloudInventory.CloudInventory = CloudInventory;
