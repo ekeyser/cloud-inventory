@@ -26,6 +26,10 @@ export class CloudInventory {
         // this.awsServices = config.aws.services;
     }
 
+    static getRequestPermissions = () => {
+        return AwsInventory.getRequestPermissions();
+    };
+
     inventory() {
         return new Promise((resolve) => {
             this.objGlobal = {};
