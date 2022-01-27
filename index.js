@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * @author ekeyser
  */
@@ -11,20 +10,17 @@ import {AwsInventory} from 'aws-inventory';
 
 export class CloudInventory {
 
-    // MAX_WAIT = 5000;
-    // objGlobal = {};
-    // credentials;
-    // config;
-
     constructor(config) {
         this.config = config;
-        // Object.keys(config).forEach((vendor) => {
-        //
-        // });
-        // this.credentials = config.aws.credentials;
-        // this.awsRegions = config.aws.regions;
-        // this.awsServices = config.aws.services;
     }
+
+    static getPermissions = () => {
+        return AwsInventory.getPermissions();
+    };
+
+    static getInitiators = () => {
+        return AwsInventory.getInitiators();
+    };
 
     static getRequestPermissions = () => {
         return AwsInventory.getRequestPermissions();
@@ -56,15 +52,11 @@ export class CloudInventory {
                         console.error(`Unknown cloud providers: '${vendor}'`);
                 }
 
-                // this.MAX_WAIT = Math.floor((this.config[vendor].regions.length + this.config[vendor].services.length) / 2) * 1000;
                 arrRequests.push(oCloudProvider.inventory()
                     .then((promise) => {
                         this.objGlobal[vendor] = promise;
                     })
                 );
-                // this.config[vendor].regions.forEach((region) => {
-                //     arrRequests.push(oCloudProvider.inventory(region, this.config.awsServices, this.credentials));
-                // });
             });
 
             Promise.all(arrRequests)
