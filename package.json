@@ -1,6 +1,6 @@
 {
   "name": "cloud-inventory",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "description": "Cloud Infrastructure Inventory",
   "main": "index.js",
   "repository": "ekeyser/cloud-inventory",
